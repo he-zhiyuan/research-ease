@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { listProjectsForManager } from '@/api/project'
 import type { ProjectResponse } from '@/types'
 import { PROJECT_STATUS_LABEL, PROJECT_STATUS_TAG } from '@/utils/dict'
+import { formatDate, formatDateTime } from '@/utils/format'
 
 const router = useRouter()
 const projects = ref<ProjectResponse[]>([])
@@ -51,7 +52,7 @@ onMounted(loadProjects)
         <el-button type="primary" @click="loadProjects">查询</el-button>
       </div>
     </div>
-    <el-table v-loading="loading" :data="projects" @row-click="(row: ProjectResponse) => goDetail(row.id)">
+    <el-table v-loading="loading" :data="projects" @row-click="(row) => goDetail((row as ProjectResponse).id)">
       <el-table-column prop="projectName" label="项目名称" min-width="200" />
       <el-table-column prop="leaderName" label="负责人" width="120" />
       <el-table-column label="状态" width="100">
@@ -59,9 +60,15 @@ onMounted(loadProjects)
           <el-tag :type="PROJECT_STATUS_TAG[row.status]">{{ PROJECT_STATUS_LABEL[row.status] }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="startDate" label="起始日期" width="120" />
-      <el-table-column prop="endDate" label="截止日期" width="120" />
-      <el-table-column prop="submittedAt" label="提交时间" width="180" />
+      <el-table-column label="起始日期" width="150" class-name="nowrap-cell">
+        <template #default="{ row }">{{ formatDate(row.startDate) }}</template>
+      </el-table-column>
+      <el-table-column label="截止日期" width="150" class-name="nowrap-cell">
+        <template #default="{ row }">{{ formatDate(row.endDate) }}</template>
+      </el-table-column>
+      <el-table-column label="提交时间" width="200">
+        <template #default="{ row }">{{ formatDateTime(row.submittedAt) }}</template>
+      </el-table-column>
       <el-table-column label="操作" width="100" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click.stop="goDetail(row.id)">详情</el-button>
@@ -86,5 +93,9 @@ onMounted(loadProjects)
 
 :deep(.el-table__row) {
   cursor: pointer;
+}
+
+:deep(.nowrap-cell .cell) {
+  white-space: nowrap;
 }
 </style>

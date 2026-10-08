@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
 import { createUser, listUsers, setUserEnabled } from '@/api/user'
 import type { Role, UserResponse } from '@/types'
 import { ROLE_LABEL } from '@/utils/dict'
+import { formatDateTime } from '@/utils/format'
 
 const users = ref<UserResponse[]>([])
 const loading = ref(false)
@@ -59,8 +60,8 @@ async function handleCreate() {
   }
 }
 
-async function handleToggleEnabled(row: UserResponse, enabled: boolean) {
-  await setUserEnabled(row.id, enabled)
+async function handleToggleEnabled(row: UserResponse, enabled: string | number | boolean) {
+  await setUserEnabled(row.id, Boolean(enabled))
   ElMessage.success(enabled ? '账号已启用' : '账号已禁用')
   await loadUsers()
 }
@@ -80,12 +81,14 @@ onMounted(loadUsers)
       <el-table-column label="角色" width="140">
         <template #default="{ row }">{{ ROLE_LABEL[row.role] }}</template>
       </el-table-column>
-      <el-table-column prop="createdAt" label="创建时间" width="180" />
+      <el-table-column label="创建时间" width="200">
+        <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
+      </el-table-column>
       <el-table-column label="启用状态" width="120">
         <template #default="{ row }">
           <el-switch
-            :model-value="row.enabled"
-            @change="(val: boolean) => handleToggleEnabled(row, val)"
+            :model-value="(row as UserResponse).enabled"
+            @change="(val) => handleToggleEnabled(row as UserResponse, val)"
           />
         </template>
       </el-table-column>

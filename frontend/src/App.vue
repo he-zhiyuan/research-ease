@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { useUserStore } from '@/store/user'
 
 const route = useRoute()
@@ -33,21 +34,23 @@ function handleLogout() {
 </script>
 
 <template>
-  <div v-if="showNav" class="layout">
-    <el-menu mode="horizontal" :default-active="route.path" router class="nav-menu" :ellipsis="false">
-      <div class="brand">ResearchEase</div>
-      <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
-        {{ item.label }}
-      </el-menu-item>
-      <div class="nav-spacer" />
-      <span class="user-info">{{ userStore.realName }}（{{ userStore.role }}）</span>
-      <el-button link type="primary" @click="handleLogout">退出登录</el-button>
-    </el-menu>
-    <div class="main-content">
-      <router-view />
+  <el-config-provider :locale="zhCn">
+    <div v-if="showNav" class="layout">
+      <el-menu mode="horizontal" :default-active="route.path" router class="nav-menu" :ellipsis="false">
+        <div class="brand">ResearchEase</div>
+        <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
+          {{ item.label }}
+        </el-menu-item>
+        <div class="nav-spacer" />
+        <span class="user-info">{{ userStore.realName }}（{{ userStore.role }}）</span>
+        <el-button link type="primary" @click="handleLogout">退出登录</el-button>
+      </el-menu>
+      <div class="main-content">
+        <router-view />
+      </div>
     </div>
-  </div>
-  <router-view v-else />
+    <router-view v-else />
+  </el-config-provider>
 </template>
 
 <style scoped>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { approveExpenditure, listExpendituresByStatus, rejectExpenditure } from '@/api/expenditure'
 import type { ExpenditureResponse } from '@/types'
 import { BUDGET_CATEGORY_LABEL, EXPENDITURE_STATUS_LABEL, EXPENDITURE_STATUS_TAG } from '@/utils/dict'
+import { formatDateTime } from '@/utils/format'
 
 const router = useRouter()
 const expenditures = ref<ExpenditureResponse[]>([])
@@ -79,12 +79,14 @@ onMounted(loadExpenditures)
           <el-tag :type="EXPENDITURE_STATUS_TAG[row.status]">{{ EXPENDITURE_STATUS_LABEL[row.status] }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="createdAt" label="提交时间" width="180" />
+      <el-table-column label="提交时间" width="200">
+        <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
+      </el-table-column>
       <el-table-column label="操作" width="160" fixed="right">
         <template #default="{ row }">
           <template v-if="row.status === 'PENDING'">
-            <el-button link type="primary" @click="handleApprove(row)">批准</el-button>
-            <el-button link type="danger" @click="openReject(row)">驳回</el-button>
+            <el-button link type="primary" @click="handleApprove(row as ExpenditureResponse)">批准</el-button>
+            <el-button link type="danger" @click="openReject(row as ExpenditureResponse)">驳回</el-button>
           </template>
         </template>
       </el-table-column>

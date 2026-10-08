@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
 import { login } from '@/api/auth'
 import { useUserStore } from '@/store/user'
 
@@ -35,11 +35,13 @@ function homePathFor(role: string) {
 }
 
 async function handleSubmit() {
-  const valid = await formRef.value?.validate().catch(() => false)
-  if (!valid) return
-
+  if (loading.value) return
   loading.value = true
+
   try {
+    const valid = await formRef.value?.validate().catch(() => false)
+    if (!valid) return
+
     const result = await login(form)
     userStore.setLoginInfo(result)
     ElMessage.success('登录成功')

@@ -95,6 +95,9 @@ function homeRedirect() {
 router.beforeEach((to) => {
   const userStore = useUserStore()
   if (to.meta.public) {
+    if (to.name === 'login' && userStore.isLoggedIn) {
+      return homeRedirect()
+    }
     return true
   }
   if (!userStore.isLoggedIn) {

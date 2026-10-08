@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { getProject, listApprovalRecords, submitAcceptance } from '@/api/project'
 import { listProgressReports, submitProgressReport } from '@/api/progress'
 import { listBudgetItemsWithBalance, listExpendituresForProject, submitExpenditure } from '@/api/expenditure'
@@ -25,6 +24,7 @@ import {
   PROJECT_STATUS_LABEL,
   PROJECT_STATUS_TAG,
 } from '@/utils/dict'
+import { formatDate, formatDateTime } from '@/utils/format'
 
 const route = useRoute()
 const router = useRouter()
@@ -141,7 +141,7 @@ onMounted(loadAll)
           <el-descriptions-item label="负责人">{{ project.leaderName }}</el-descriptions-item>
           <el-descriptions-item label="团队成员">{{ project.teamMembers || '-' }}</el-descriptions-item>
           <el-descriptions-item label="经费来源">{{ project.fundingSource || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="起止日期">{{ project.startDate }} ~ {{ project.endDate }}</el-descriptions-item>
+          <el-descriptions-item label="起止日期">{{ formatDate(project.startDate) }} ~ {{ formatDate(project.endDate) }}</el-descriptions-item>
           <el-descriptions-item label="研究内容" :span="2">{{ project.researchContent || '-' }}</el-descriptions-item>
         </el-descriptions>
         <h4>预算科目</h4>
@@ -170,7 +170,9 @@ onMounted(loadAll)
           </el-table-column>
           <el-table-column prop="comment" label="意见" />
           <el-table-column prop="operatorName" label="操作人" width="120" />
-          <el-table-column prop="createdAt" label="时间" width="180" />
+          <el-table-column label="时间" width="200">
+            <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
+          </el-table-column>
         </el-table>
       </el-tab-pane>
 
@@ -187,7 +189,9 @@ onMounted(loadAll)
           </el-form-item>
         </el-form>
         <el-table :data="progressReports">
-          <el-table-column prop="reportDate" label="日期" width="120" />
+          <el-table-column label="日期" width="150" class-name="nowrap-cell">
+            <template #default="{ row }">{{ formatDate(row.reportDate) }}</template>
+          </el-table-column>
           <el-table-column prop="content" label="内容" />
           <el-table-column prop="creatorName" label="提交人" width="120" />
         </el-table>
@@ -239,7 +243,9 @@ onMounted(loadAll)
               <el-tag :type="EXPENDITURE_STATUS_TAG[row.status]">{{ EXPENDITURE_STATUS_LABEL[row.status] }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="createdAt" label="提交时间" width="180" />
+          <el-table-column label="提交时间" width="200">
+            <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
+          </el-table-column>
         </el-table>
       </el-tab-pane>
 
@@ -271,7 +277,9 @@ onMounted(loadAll)
             </el-table-column>
             <el-table-column prop="title" label="标题" />
             <el-table-column prop="detail" label="详情" />
-            <el-table-column prop="achievedDate" label="取得日期" width="120" />
+            <el-table-column label="取得日期" width="150" class-name="nowrap-cell">
+              <template #default="{ row }">{{ formatDate(row.achievedDate) }}</template>
+            </el-table-column>
           </el-table>
         </div>
         <el-alert v-if="!isExecuting && !isAccepting && !isCompleted" title="项目尚未进入执行阶段" type="info" :closable="false" />
@@ -314,5 +322,9 @@ h4 {
 
 .submit-acceptance {
   margin-top: 12px;
+}
+
+:deep(.nowrap-cell .cell) {
+  white-space: nowrap;
 }
 </style>

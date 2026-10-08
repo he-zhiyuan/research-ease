@@ -7,7 +7,9 @@ export const PROJECT_STATUS_LABEL: Record<string, string> = {
   COMPLETED: '已结题',
 }
 
-export const PROJECT_STATUS_TAG: Record<string, string> = {
+export type TagType = 'primary' | 'success' | 'warning' | 'info' | 'danger'
+
+export const PROJECT_STATUS_TAG: Record<string, TagType> = {
   DRAFT: 'info',
   SUBMITTED: 'warning',
   REJECTED: 'danger',
@@ -51,7 +53,7 @@ export const EXPENDITURE_STATUS_LABEL: Record<string, string> = {
   REJECTED: '已驳回',
 }
 
-export const EXPENDITURE_STATUS_TAG: Record<string, string> = {
+export const EXPENDITURE_STATUS_TAG: Record<string, TagType> = {
   PENDING: 'warning',
   APPROVED: 'success',
   REJECTED: 'danger',

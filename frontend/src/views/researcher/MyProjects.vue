@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import { listMyProjects, submitProject } from '@/api/project'
 import type { ProjectResponse } from '@/types'
 import { PROJECT_STATUS_LABEL, PROJECT_STATUS_TAG } from '@/utils/dict'
+import { formatDate, formatDateTime } from '@/utils/format'
 
 const router = useRouter()
 const projects = ref<ProjectResponse[]>([])
@@ -49,16 +49,22 @@ onMounted(loadProjects)
       <h2>我的项目</h2>
       <el-button type="primary" @click="goCreate">新建项目申报</el-button>
     </div>
-    <el-table v-loading="loading" :data="projects" @row-click="(row: ProjectResponse) => goDetail(row.id)">
+    <el-table v-loading="loading" :data="projects" @row-click="(row) => goDetail((row as ProjectResponse).id)">
       <el-table-column prop="projectName" label="项目名称" min-width="200" />
       <el-table-column label="状态" width="100">
         <template #default="{ row }">
           <el-tag :type="PROJECT_STATUS_TAG[row.status]">{{ PROJECT_STATUS_LABEL[row.status] }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="startDate" label="起始日期" width="120" />
-      <el-table-column prop="endDate" label="截止日期" width="120" />
-      <el-table-column prop="createdAt" label="创建时间" width="180" />
+      <el-table-column label="起始日期" width="150" class-name="nowrap-cell">
+        <template #default="{ row }">{{ formatDate(row.startDate) }}</template>
+      </el-table-column>
+      <el-table-column label="截止日期" width="150" class-name="nowrap-cell">
+        <template #default="{ row }">{{ formatDate(row.endDate) }}</template>
+      </el-table-column>
+      <el-table-column label="创建时间" width="200">
+        <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
+      </el-table-column>
       <el-table-column label="操作" width="200" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click.stop="goDetail(row.id)">详情</el-button>
@@ -74,7 +80,7 @@ onMounted(loadProjects)
             v-if="row.status === 'DRAFT' || row.status === 'REJECTED'"
             link
             type="success"
-            @click.stop="handleSubmit(row)"
+            @click.stop="handleSubmit(row as ProjectResponse)"
           >
             提交
           </el-button>
@@ -94,5 +100,9 @@ onMounted(loadProjects)
 
 :deep(.el-table__row) {
   cursor: pointer;
+}
+
+:deep(.nowrap-cell .cell) {
+  white-space: nowrap;
 }
 </style>

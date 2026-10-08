@@ -5,6 +5,7 @@ import { getDashboardOverview } from '@/api/dashboard'
 import { listOverdueProjects } from '@/api/progress'
 import type { DashboardOverviewResponse, OverdueProjectResponse } from '@/types'
 import { PROJECT_STATUS_LABEL } from '@/utils/dict'
+import { formatDate } from '@/utils/format'
 
 const router = useRouter()
 const overview = ref<DashboardOverviewResponse>()
@@ -74,7 +75,9 @@ onMounted(loadDashboard)
         </template>
       </el-table-column>
       <el-table-column prop="leaderName" label="负责人" width="120" />
-      <el-table-column prop="lastReportDate" label="最近进度日期" width="140" />
+      <el-table-column label="最近进度日期" width="160" class-name="nowrap-cell">
+        <template #default="{ row }">{{ formatDate(row.lastReportDate) }}</template>
+      </el-table-column>
       <el-table-column prop="daysSinceLastReport" label="超期天数" width="120" />
     </el-table>
   </div>
@@ -102,5 +105,9 @@ onMounted(loadDashboard)
 
 h3 {
   margin: 20px 0 8px;
+}
+
+:deep(.nowrap-cell .cell) {
+  white-space: nowrap;
 }
 </style>

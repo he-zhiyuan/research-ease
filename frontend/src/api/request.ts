@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
 import router from '@/router'
 import { useUserStore } from '@/store/user'
 import type { Result } from '@/types'
@@ -31,8 +30,16 @@ request.interceptors.response.use(
     const message = error.response?.data?.message || error.message || '网络错误'
     if (status === 401) {
       const userStore = useUserStore()
-      userStore.logout()
-      router.push('/login')
+      const requestToken = error.config?.headers?.Authorization
+      const currentToken = userStore.token ? `Bearer ${userStore.token}` : ''
+      // 只有当这次 401 用的还是当前登录态的 token 时才登出，避免一次更早发出、更晚返回的
+      // 请求（比如重复点击登录触发的旧请求）用过期结果顶掉刚刚登录成功的新会话
+      if (!currentToken || requestToken === currentToken) {
+        userStore.logout()
+        if (router.currentRoute.value.name !== 'login') {
+          router.push('/login')
+        }
+      }
     }
     ElMessage.error(message)
     return Promise.reject(error)
