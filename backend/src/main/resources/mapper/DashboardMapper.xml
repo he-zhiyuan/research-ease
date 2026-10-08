@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.researchease.mapper.DashboardMapper">
+
+    <select id="countProjectsByStatus" resultType="map">
+        SELECT status AS status, COUNT(*) AS cnt
+        FROM project
+        GROUP BY status
+    </select>
+
+    <select id="sumRequestedBudget" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(requested_amount), 0) FROM budget_item
+    </select>
+
+    <select id="sumApprovedBudget" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(approved_amount), 0) FROM budget_item
+    </select>
+
+    <select id="sumExpenditureByStatus" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0) FROM expenditure WHERE status = #{status}
+    </select>
+
+</mapper>

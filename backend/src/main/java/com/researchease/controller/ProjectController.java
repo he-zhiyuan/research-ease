@@ -3,6 +3,8 @@ package com.researchease.controller;
 import com.researchease.common.LoginUser;
 import com.researchease.common.Result;
 import com.researchease.common.SecurityUtils;
+import com.researchease.dto.AcceptanceRequest;
+import com.researchease.dto.AchievementResponse;
 import com.researchease.dto.ApprovalRecordResponse;
 import com.researchease.dto.ApproveProjectRequest;
 import com.researchease.dto.ProjectCreateRequest;
@@ -89,6 +91,34 @@ public class ProjectController {
     @PreAuthorize("hasRole('MANAGER')")
     public Result<Void> reject(@PathVariable Long id, @Valid @RequestBody RejectRequest request) {
         projectService.reject(id, request, SecurityUtils.getCurrentUserId());
+        return Result.ok();
+    }
+
+    @PostMapping("/{id}/acceptance")
+    @PreAuthorize("hasRole('RESEARCHER')")
+    public Result<Void> submitAcceptance(@PathVariable Long id, @Valid @RequestBody AcceptanceRequest request) {
+        projectService.submitAcceptance(id, request, SecurityUtils.getCurrentUserId());
+        return Result.ok();
+    }
+
+    @GetMapping("/{id}/achievements")
+    @PreAuthorize("hasAnyRole('RESEARCHER','MANAGER')")
+    public Result<List<AchievementResponse>> achievements(@PathVariable Long id) {
+        LoginUser current = SecurityUtils.getCurrentUser();
+        return Result.ok(projectService.listAchievements(id, current.getUserId(), current.getRole()));
+    }
+
+    @PostMapping("/{id}/acceptance/approve")
+    @PreAuthorize("hasRole('MANAGER')")
+    public Result<Void> approveAcceptance(@PathVariable Long id) {
+        projectService.approveAcceptance(id, SecurityUtils.getCurrentUserId());
+        return Result.ok();
+    }
+
+    @PostMapping("/{id}/acceptance/reject")
+    @PreAuthorize("hasRole('MANAGER')")
+    public Result<Void> rejectAcceptance(@PathVariable Long id, @Valid @RequestBody RejectRequest request) {
+        projectService.rejectAcceptance(id, request, SecurityUtils.getCurrentUserId());
         return Result.ok();
     }
 }

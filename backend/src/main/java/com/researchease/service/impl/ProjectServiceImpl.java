@@ -2,6 +2,9 @@ package com.researchease.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.researchease.common.BusinessException;
+import com.researchease.dto.AcceptanceRequest;
+import com.researchease.dto.AchievementRequest;
+import com.researchease.dto.AchievementResponse;
 import com.researchease.dto.ApprovalRecordResponse;
 import com.researchease.dto.ApproveProjectRequest;
 import com.researchease.dto.BudgetApprovalItem;
@@ -11,6 +14,7 @@ import com.researchease.dto.ProjectCreateRequest;
 import com.researchease.dto.ProjectResponse;
 import com.researchease.dto.ProjectUpdateRequest;
 import com.researchease.dto.RejectRequest;
+import com.researchease.entity.Achievement;
 import com.researchease.entity.ApprovalRecord;
 import com.researchease.entity.BudgetItem;
 import com.researchease.entity.Project;
@@ -19,6 +23,7 @@ import com.researchease.enums.ApprovalResult;
 import com.researchease.enums.ApprovalType;
 import com.researchease.enums.ProjectStatus;
 import com.researchease.enums.Role;
+import com.researchease.mapper.AchievementMapper;
 import com.researchease.mapper.ApprovalRecordMapper;
 import com.researchease.mapper.BudgetItemMapper;
 import com.researchease.mapper.ProjectMapper;
@@ -42,6 +47,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final BudgetItemMapper budgetItemMapper;
     private final ApprovalRecordMapper approvalRecordMapper;
     private final UserMapper userMapper;
+    private final AchievementMapper achievementMapper;
 
     @Override
     @Transactional
@@ -186,6 +192,74 @@ public class ProjectServiceImpl implements ProjectService {
                 new LambdaQueryWrapper<ApprovalRecord>().eq(ApprovalRecord::getProjectId, projectId)
                         .orderByDesc(ApprovalRecord::getCreatedAt));
         return records.stream().map(this::toApprovalResponse).toList();
+    }
+
+    @Override
+    @Transactional
+    public void submitAcceptance(Long projectId, AcceptanceRequest request, Long currentUserId) {
+        Project project = requireProject(projectId);
+        requireLeader(project, currentUserId);
+        ProjectStatus status = ProjectStatus.valueOf(project.getStatus());
+        if (status != ProjectStatus.EXECUTING) {
+            throw new BusinessException("当前状态[" + status + "]不允许提交结题申请");
+        }
+
+        achievementMapper.delete(new LambdaQueryWrapper<Achievement>().eq(Achievement::getProjectId, projectId));
+        for (AchievementRequest item : request.getAchievements()) {
+            Achievement achievement = new Achievement();
+            achievement.setProjectId(projectId);
+            achievement.setType(item.getType().name());
+            achievement.setTitle(item.getTitle());
+            achievement.setDetail(item.getDetail());
+            achievement.setAchievedDate(item.getAchievedDate());
+            achievementMapper.insert(achievement);
+        }
+
+        project.setStatus(ProjectStatus.ACCEPTING.name());
+        projectMapper.updateById(project);
+    }
+
+    @Override
+    @Transactional
+    public void approveAcceptance(Long projectId, Long operatorId) {
+        Project project = requireProject(projectId);
+        ProjectStatus status = ProjectStatus.valueOf(project.getStatus());
+        if (status != ProjectStatus.ACCEPTING) {
+            throw new BusinessException("当前状态[" + status + "]不允许验收通过");
+        }
+        project.setStatus(ProjectStatus.COMPLETED.name());
+        projectMapper.updateById(project);
+
+        recordApproval(projectId, ApprovalType.ACCEPTANCE_APPROVAL, null, ApprovalResult.APPROVED, null, operatorId);
+    }
+
+    @Override
+    @Transactional
+    public void rejectAcceptance(Long projectId, RejectRequest request, Long operatorId) {
+        Project project = requireProject(projectId);
+        ProjectStatus status = ProjectStatus.valueOf(project.getStatus());
+        if (status != ProjectStatus.ACCEPTING) {
+            throw new BusinessException("当前状态[" + status + "]不允许验收驳回");
+        }
+        project.setStatus(ProjectStatus.EXECUTING.name());
+        projectMapper.updateById(project);
+
+        recordApproval(projectId, ApprovalType.ACCEPTANCE_APPROVAL, null, ApprovalResult.REJECTED, request.getComment(), operatorId);
+    }
+
+    @Override
+    public List<AchievementResponse> listAchievements(Long projectId, Long currentUserId, String currentRole) {
+        Project project = requireProject(projectId);
+        if (Role.RESEARCHER.name().equals(currentRole)) {
+            requireLeader(project, currentUserId);
+        }
+        List<Achievement> achievements = achievementMapper.selectList(
+                new LambdaQueryWrapper<Achievement>().eq(Achievement::getProjectId, projectId)
+                        .orderByDesc(Achievement::getCreatedAt));
+        return achievements.stream()
+                .map(a -> new AchievementResponse(a.getId(), a.getType(), a.getTitle(), a.getDetail(),
+                        a.getAchievedDate(), a.getCreatedAt()))
+                .toList();
     }
 
     private void insertBudgetItems(Long projectId, List<BudgetItemRequest> items) {
