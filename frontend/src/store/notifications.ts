@@ -31,14 +31,14 @@ async function buildManagerItems(): Promise<NotificationItem[]> {
   const items: NotificationItem[] = []
   pendingProjects.forEach((p) => {
     items.push({
-      key: `project-${p.id}`,
+      key: `project-${p.id}-${p.submittedAt}`,
       text: `${p.leaderName} 提交了项目「${p.projectName}」的立项申报，等待审批`,
       route: `/manager/projects/${p.id}`,
     })
   })
   acceptingProjects.forEach((p) => {
     items.push({
-      key: `acceptance-${p.id}`,
+      key: `acceptance-${p.id}-${p.updatedAt}`,
       text: `${p.leaderName} 提交了项目「${p.projectName}」的结题申请，等待验收`,
       route: `/manager/projects/${p.id}`,
     })
