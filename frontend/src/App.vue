@@ -74,7 +74,10 @@ function handleLogout() {
   <el-config-provider :locale="zhCn">
     <div v-if="showNav" class="layout">
       <el-menu mode="horizontal" :default-active="route.path" router class="nav-menu" :ellipsis="false">
-        <div class="brand">ResearchEase</div>
+        <div class="brand">
+          <img src="/favicon.svg" alt="" class="brand-logo" />
+          <span>ResearchEase</span>
+        </div>
         <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
           <el-badge v-if="item.badge" :value="item.badge" class="menu-badge">{{ item.label }}</el-badge>
           <template v-else>{{ item.label }}</template>
@@ -113,10 +116,18 @@ function handleLogout() {
 }
 
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 18px;
   font-weight: 600;
   color: #409eff;
   margin-right: 24px;
+}
+
+.brand-logo {
+  width: 24px;
+  height: 24px;
 }
 
 .nav-spacer {

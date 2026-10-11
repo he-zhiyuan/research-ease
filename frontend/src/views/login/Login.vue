@@ -56,6 +56,7 @@ async function handleSubmit() {
 <template>
   <div class="login-page">
     <el-card class="login-card">
+      <img src="/favicon.svg" alt="" class="login-logo" />
       <h2 class="title">ResearchEase</h2>
       <p class="subtitle">科研项目全生命周期管理平台</p>
       <el-form ref="formRef" :model="form" :rules="rules" @keyup.enter="handleSubmit">
@@ -87,6 +88,13 @@ async function handleSubmit() {
 .login-card {
   width: 360px;
   padding: 16px;
+}
+
+.login-logo {
+  display: block;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
 }
 
 .title {
