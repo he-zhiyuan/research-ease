@@ -37,13 +37,14 @@ jobs:
           npm ci
           npm run build
 
-      - name: Set up deploy SSH key
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Trust server host key
         run: |
           mkdir -p ~/.ssh
-          cat <<'EOF' > ~/.ssh/deploy_key
-          ${{ secrets.SSH_PRIVATE_KEY }}
-          EOF
-          chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to server
@@ -51,6 +52,6 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
         run: |
-          scp -i ~/.ssh/deploy_key backend/target/research-ease-backend.jar "$SSH_USER@$SSH_HOST:/opt/research-ease/app.jar"
-          rsync -az --delete -e "ssh -i ~/.ssh/deploy_key" frontend/dist/ "$SSH_USER@$SSH_HOST:/var/www/research-ease/"
-          ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" "systemctl --user restart research-ease"
+          scp backend/target/research-ease-backend.jar "$SSH_USER@$SSH_HOST:/opt/research-ease/app.jar"
+          rsync -az --delete frontend/dist/ "$SSH_USER@$SSH_HOST:/var/www/research-ease/"
+          ssh "$SSH_USER@$SSH_HOST" "systemctl --user restart research-ease"
