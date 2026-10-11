@@ -17,4 +17,6 @@ public interface DashboardMapper {
     BigDecimal sumApprovedBudget();
 
     BigDecimal sumExpenditureByStatus(@Param("status") String status);
+
+    long countExpenditureByStatus(@Param("status") String status);
 }

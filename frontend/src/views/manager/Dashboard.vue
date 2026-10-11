@@ -57,6 +57,18 @@ onMounted(loadDashboard)
         <div class="stat-label">结余</div>
         <div class="stat-value">{{ overview.totalBalance }}</div>
       </el-card>
+      <el-card class="stat-card">
+        <div class="stat-label">待审批项目</div>
+        <div class="stat-value">{{ overview.pendingProjectCount }}</div>
+      </el-card>
+      <el-card class="stat-card">
+        <div class="stat-label">待审验收项目</div>
+        <div class="stat-value">{{ overview.pendingAcceptanceCount }}</div>
+      </el-card>
+      <el-card class="stat-card">
+        <div class="stat-label">待审经费</div>
+        <div class="stat-value">{{ overview.pendingExpenditureCount }}</div>
+      </el-card>
     </div>
 
     <h3>项目状态分布</h3>

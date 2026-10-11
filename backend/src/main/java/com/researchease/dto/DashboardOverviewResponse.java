@@ -16,4 +16,7 @@ public class DashboardOverviewResponse {
     private BigDecimal totalSpent;
     private BigDecimal totalPending;
     private BigDecimal totalBalance;
+    private long pendingProjectCount;
+    private long pendingAcceptanceCount;
+    private long pendingExpenditureCount;
 }

@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { useUserStore } from '@/store/user'
+import { usePendingCountsStore } from '@/store/pendingCounts'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const pendingCounts = usePendingCountsStore()
 
 const showNav = computed(() => !route.meta.public)
 
@@ -16,14 +18,32 @@ const menuItems = computed(() => {
       return [{ path: '/researcher/projects', label: '我的项目' }]
     case 'MANAGER':
       return [
-        { path: '/manager/projects', label: '项目审批' },
-        { path: '/manager/expenditures', label: '经费审核' },
+        { path: '/manager/projects', label: '项目审批', badge: pendingCounts.projectCount },
+        { path: '/manager/expenditures', label: '经费审核', badge: pendingCounts.expenditureCount },
         { path: '/manager/dashboard', label: '数据看板' },
       ]
     case 'ADMIN':
       return [{ path: '/admin/users', label: '账号管理' }]
     default:
       return []
+  }
+})
+
+watch(
+  () => userStore.role,
+  (role) => {
+    if (role === 'MANAGER') {
+      pendingCounts.refresh()
+    } else {
+      pendingCounts.reset()
+    }
+  },
+  { immediate: true },
+)
+
+router.afterEach((to) => {
+  if (userStore.role === 'MANAGER' && to.path.startsWith('/manager')) {
+    pendingCounts.refresh()
   }
 })
 
@@ -39,7 +59,8 @@ function handleLogout() {
       <el-menu mode="horizontal" :default-active="route.path" router class="nav-menu" :ellipsis="false">
         <div class="brand">ResearchEase</div>
         <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
-          {{ item.label }}
+          <el-badge v-if="item.badge" :value="item.badge" class="menu-badge">{{ item.label }}</el-badge>
+          <template v-else>{{ item.label }}</template>
         </el-menu-item>
         <div class="nav-spacer" />
         <span class="user-info">{{ userStore.realName }}（{{ userStore.role }}）</span>
@@ -86,5 +107,9 @@ function handleLogout() {
   flex: 1;
   overflow: auto;
   padding: 20px 24px;
+}
+
+.menu-badge :deep(.el-badge__content) {
+  top: 4px;
 }
 </style>

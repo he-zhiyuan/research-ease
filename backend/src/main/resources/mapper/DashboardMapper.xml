@@ -20,4 +20,8 @@
         SELECT COALESCE(SUM(amount), 0) FROM expenditure WHERE status = #{status}
     </select>
 
+    <select id="countExpenditureByStatus" resultType="long">
+        SELECT COUNT(*) FROM expenditure WHERE status = #{status}
+    </select>
+
 </mapper>

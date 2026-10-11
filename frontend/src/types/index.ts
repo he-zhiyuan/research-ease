@@ -181,6 +181,9 @@ export interface DashboardOverviewResponse {
   totalSpent: number
   totalPending: number
   totalBalance: number
+  pendingProjectCount: number
+  pendingAcceptanceCount: number
+  pendingExpenditureCount: number
 }
 
 export interface UserCreateRequest {

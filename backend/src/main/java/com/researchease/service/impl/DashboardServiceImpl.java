@@ -2,6 +2,7 @@ package com.researchease.service.impl;
 
 import com.researchease.dto.DashboardOverviewResponse;
 import com.researchease.enums.ExpenditureStatus;
+import com.researchease.enums.ProjectStatus;
 import com.researchease.mapper.DashboardMapper;
 import com.researchease.service.DashboardService;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,12 @@ public class DashboardServiceImpl implements DashboardService {
         BigDecimal totalPending = dashboardMapper.sumExpenditureByStatus(ExpenditureStatus.PENDING.name());
         BigDecimal totalBalance = totalApproved.subtract(totalSpent).subtract(totalPending);
 
+        long pendingProjectCount = statusCounts.getOrDefault(ProjectStatus.SUBMITTED.name(), 0L);
+        long pendingAcceptanceCount = statusCounts.getOrDefault(ProjectStatus.ACCEPTING.name(), 0L);
+        long pendingExpenditureCount = dashboardMapper.countExpenditureByStatus(ExpenditureStatus.PENDING.name());
+
         return new DashboardOverviewResponse(total, statusCounts, totalRequested, totalApproved,
-                totalSpent, totalPending, totalBalance);
+                totalSpent, totalPending, totalBalance,
+                pendingProjectCount, pendingAcceptanceCount, pendingExpenditureCount);
     }
 }
