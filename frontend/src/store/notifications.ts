@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { listMyApprovalRecords, listProjectsForManager } from '@/api/project'
 import { listExpendituresByStatus } from '@/api/expenditure'
+import { listRecentProgressReports } from '@/api/progress'
 import { useUserStore } from '@/store/user'
 import type { MyApprovalRecordResponse } from '@/types'
 
@@ -22,10 +23,11 @@ function saveDismissedMap(map: Record<string, string[]>) {
 }
 
 async function buildManagerItems(): Promise<NotificationItem[]> {
-  const [pendingProjects, acceptingProjects, pendingExpenditures] = await Promise.all([
+  const [pendingProjects, acceptingProjects, pendingExpenditures, recentProgressReports] = await Promise.all([
     listProjectsForManager({ status: 'SUBMITTED' }),
     listProjectsForManager({ status: 'ACCEPTING' }),
     listExpendituresByStatus('PENDING'),
+    listRecentProgressReports(),
   ])
 
   const items: NotificationItem[] = []
@@ -48,6 +50,13 @@ async function buildManagerItems(): Promise<NotificationItem[]> {
       key: `expenditure-${e.id}`,
       text: `${e.creatorName} 提交了一笔经费支出申请（¥${e.amount}），等待审核`,
       route: `/manager/expenditures`,
+    })
+  })
+  recentProgressReports.forEach((r) => {
+    items.push({
+      key: `progress-${r.id}`,
+      text: `${r.creatorName} 在项目「${r.projectName}」中提交了新的进度汇报`,
+      route: `/manager/projects/${r.projectId}`,
     })
   })
   return items

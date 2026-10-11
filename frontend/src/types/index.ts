@@ -130,6 +130,16 @@ export interface ProgressReportResponse {
   createdAt: string
 }
 
+export interface RecentProgressReportResponse {
+  id: number
+  projectId: number
+  projectName: string | null
+  content: string
+  reportDate: string
+  creatorName: string | null
+  createdAt: string
+}
+
 export interface OverdueProjectResponse {
   projectId: number
   projectName: string

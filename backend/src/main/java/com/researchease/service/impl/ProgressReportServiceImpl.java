@@ -5,6 +5,7 @@ import com.researchease.common.BusinessException;
 import com.researchease.dto.OverdueProjectResponse;
 import com.researchease.dto.ProgressReportRequest;
 import com.researchease.dto.ProgressReportResponse;
+import com.researchease.dto.RecentProgressReportResponse;
 import com.researchease.entity.Project;
 import com.researchease.entity.ProgressReport;
 import com.researchease.entity.User;
@@ -90,6 +91,13 @@ public class ProgressReportServiceImpl implements ProgressReportService {
                 .toList();
     }
 
+    @Override
+    public List<RecentProgressReportResponse> listRecent(int limit) {
+        List<ProgressReport> reports = progressReportMapper.selectList(
+                new LambdaQueryWrapper<ProgressReport>().orderByDesc(ProgressReport::getCreatedAt));
+        return reports.stream().limit(limit).map(this::toRecentResponse).toList();
+    }
+
     private Project requireProject(Long projectId) {
         Project project = projectMapper.selectById(projectId);
         if (project == null) {
@@ -109,5 +117,13 @@ public class ProgressReportServiceImpl implements ProgressReportService {
         return new ProgressReportResponse(report.getId(), report.getProjectId(), report.getContent(),
                 report.getReportDate(), report.getCreatedBy(), creator != null ? creator.getRealName() : null,
                 report.getCreatedAt());
+    }
+
+    private RecentProgressReportResponse toRecentResponse(ProgressReport report) {
+        User creator = userMapper.selectById(report.getCreatedBy());
+        Project project = projectMapper.selectById(report.getProjectId());
+        return new RecentProgressReportResponse(report.getId(), report.getProjectId(),
+                project != null ? project.getProjectName() : null, report.getContent(), report.getReportDate(),
+                creator != null ? creator.getRealName() : null, report.getCreatedAt());
     }
 }

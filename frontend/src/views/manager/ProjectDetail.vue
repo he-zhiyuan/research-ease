@@ -187,8 +187,8 @@ onMounted(loadAll)
 
       <el-tab-pane label="进度">
         <el-table :data="progressReports">
-          <el-table-column label="日期" width="150" class-name="nowrap-cell">
-            <template #default="{ row }">{{ formatDate(row.reportDate) }}</template>
+          <el-table-column label="日期" width="200" class-name="nowrap-cell">
+            <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
           </el-table-column>
           <el-table-column prop="content" label="内容" />
           <el-table-column prop="creatorName" label="提交人" width="120" />
