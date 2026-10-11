@@ -45,13 +45,15 @@ jobs:
       - name: Trust server host key
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          timeout 20 ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to server
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_OPTS: -o ConnectTimeout=15 -o BatchMode=yes -o ServerAliveInterval=5 -o ServerAliveCountMax=3
         run: |
-          scp backend/target/research-ease-backend.jar "$SSH_USER@$SSH_HOST:/opt/research-ease/app.jar"
-          rsync -az --delete frontend/dist/ "$SSH_USER@$SSH_HOST:/var/www/research-ease/"
-          ssh "$SSH_USER@$SSH_HOST" "systemctl --user restart research-ease"
+          timeout 60 scp -o ConnectTimeout=15 -o BatchMode=yes -o ServerAliveInterval=5 -o ServerAliveCountMax=3 \
+            backend/target/research-ease-backend.jar "$SSH_USER@$SSH_HOST:/opt/research-ease/app.jar"
+          timeout 60 rsync -az --delete -e "ssh $SSH_OPTS" frontend/dist/ "$SSH_USER@$SSH_HOST:/var/www/research-ease/"
+          timeout 30 ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" "systemctl --user restart research-ease"
