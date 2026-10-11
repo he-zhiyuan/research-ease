@@ -47,20 +47,28 @@ jobs:
           mkdir -p ~/.ssh
           timeout 20 ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Diagnose SSH handshake
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-        run: |
-          timeout 30 ssh -vvv -o ConnectTimeout=15 -o BatchMode=yes "$SSH_USER@$SSH_HOST" echo diagnostic-ok 2>&1 | tail -100 || true
-
       - name: Deploy to server
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_OPTS: -o ConnectTimeout=15 -o BatchMode=yes -o ServerAliveInterval=5 -o ServerAliveCountMax=3
         run: |
-          timeout 60 scp -o ConnectTimeout=15 -o BatchMode=yes -o ServerAliveInterval=5 -o ServerAliveCountMax=3 \
+          # 跨境链路对本服务器的传输偶发丢包/卡死，用重试代替无限期等待
+          retry() {
+            local attempt=1
+            until timeout 90 "$@"; do
+              if [ "$attempt" -ge 3 ]; then
+                echo "::error::命令在 3 次重试后仍然失败: $*"
+                return 1
+              fi
+              echo "第 $attempt 次尝试失败，5 秒后重试: $*"
+              attempt=$((attempt + 1))
+              sleep 5
+            done
+          }
+
+          retry rsync -az --partial -e "ssh $SSH_OPTS" \
             backend/target/research-ease-backend.jar "$SSH_USER@$SSH_HOST:/opt/research-ease/app.jar"
-          timeout 60 rsync -az --delete -e "ssh $SSH_OPTS" frontend/dist/ "$SSH_USER@$SSH_HOST:/var/www/research-ease/"
-          timeout 30 ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" "systemctl --user restart research-ease"
+          retry rsync -az --delete --partial -e "ssh $SSH_OPTS" \
+            frontend/dist/ "$SSH_USER@$SSH_HOST:/var/www/research-ease/"
+          retry ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" "systemctl --user restart research-ease"
