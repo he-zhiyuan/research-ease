@@ -13,6 +13,7 @@ import { listProgressReports } from '@/api/progress'
 import { listBudgetItemsWithBalance, listExpendituresForProject } from '@/api/expenditure'
 import { listAchievements } from '@/api/achievement'
 import { usePendingCountsStore } from '@/store/pendingCounts'
+import { useNotificationStore } from '@/store/notifications'
 import type {
   AchievementResponse,
   ApprovalRecordResponse,
@@ -36,6 +37,7 @@ import { formatDate, formatDateTime } from '@/utils/format'
 const route = useRoute()
 const router = useRouter()
 const pendingCounts = usePendingCountsStore()
+const notificationStore = useNotificationStore()
 const projectId = Number(route.params.id)
 
 const project = ref<ProjectResponse>()
@@ -78,6 +80,7 @@ async function handleApproveProject() {
     ElMessage.success('审批通过，项目进入执行阶段')
     await loadAll()
     pendingCounts.refresh()
+    notificationStore.refresh()
   } finally {
     approving.value = false
   }
@@ -104,6 +107,7 @@ async function confirmReject() {
   rejectDialog.visible = false
   await loadAll()
   pendingCounts.refresh()
+  notificationStore.refresh()
 }
 
 async function handleApproveAcceptance() {
@@ -111,6 +115,7 @@ async function handleApproveAcceptance() {
   ElMessage.success('验收通过，项目已结题')
   await loadAll()
   pendingCounts.refresh()
+  notificationStore.refresh()
 }
 
 onMounted(loadAll)

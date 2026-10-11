@@ -6,9 +6,11 @@ import type { ExpenditureResponse } from '@/types'
 import { BUDGET_CATEGORY_LABEL, EXPENDITURE_STATUS_LABEL, EXPENDITURE_STATUS_TAG } from '@/utils/dict'
 import { formatDateTime } from '@/utils/format'
 import { usePendingCountsStore } from '@/store/pendingCounts'
+import { useNotificationStore } from '@/store/notifications'
 
 const router = useRouter()
 const pendingCounts = usePendingCountsStore()
+const notificationStore = useNotificationStore()
 const expenditures = ref<ExpenditureResponse[]>([])
 const loading = ref(false)
 const statusFilter = ref('PENDING')
@@ -31,6 +33,7 @@ async function handleApprove(row: ExpenditureResponse) {
   ElMessage.success('已批准该笔经费支出')
   await loadExpenditures()
   pendingCounts.refresh()
+  notificationStore.refresh()
 }
 
 function openReject(row: ExpenditureResponse) {
@@ -49,6 +52,7 @@ async function confirmReject() {
   rejectDialog.visible = false
   await loadExpenditures()
   pendingCounts.refresh()
+  notificationStore.refresh()
 }
 
 function goProject(projectId: number) {
