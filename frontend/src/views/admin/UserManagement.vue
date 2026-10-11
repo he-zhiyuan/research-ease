@@ -28,6 +28,8 @@ const rules: FormRules = {
 
 const roleOptions = Object.entries(ROLE_LABEL).map(([value, label]) => ({ value, label }))
 
+const PROTECTED_USERNAMES = new Set(['admin', 'manager', 'researcher'])
+
 async function loadUsers() {
   loading.value = true
   try {
@@ -108,7 +110,7 @@ onMounted(loadUsers)
           <el-button
             link
             type="danger"
-            :disabled="(row as UserResponse).username === 'admin'"
+            :disabled="PROTECTED_USERNAMES.has((row as UserResponse).username)"
             @click="handleDelete(row as UserResponse)"
           >
             删除

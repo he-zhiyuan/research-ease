@@ -21,12 +21,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private static final String PROTECTED_USERNAME = "admin";
+    private static final Set<String> PROTECTED_USERNAMES = Set.of("admin", "manager", "researcher");
 
     private final UserMapper userMapper;
     private final ProjectMapper projectMapper;
@@ -78,8 +79,8 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new BusinessException(404, "用户不存在");
         }
-        if (PROTECTED_USERNAME.equals(user.getUsername())) {
-            throw new BusinessException("系统管理员账号不可删除");
+        if (PROTECTED_USERNAMES.contains(user.getUsername())) {
+            throw new BusinessException("该账号为演示保留账号，不可删除");
         }
         boolean hasReferences = projectMapper.selectCount(
                 new LambdaQueryWrapper<Project>().eq(Project::getLeaderId, userId)) > 0
