@@ -3,6 +3,7 @@ import type {
   AcceptanceRequest,
   ApprovalRecordResponse,
   ApproveProjectRequest,
+  MyApprovalRecordResponse,
   ProjectCreateRequest,
   ProjectResponse,
   ProjectUpdateRequest,
@@ -27,6 +28,10 @@ export function listMyProjects() {
 
 export function listProjectsForManager(params: { status?: string; keyword?: string }) {
   return request.get<unknown, ProjectResponse[]>('/projects', { params })
+}
+
+export function listMyApprovalRecords() {
+  return request.get<unknown, MyApprovalRecordResponse[]>('/projects/my/approval-records')
 }
 
 export function getProject(id: number) {

@@ -4,6 +4,7 @@ import com.researchease.dto.AcceptanceRequest;
 import com.researchease.dto.AchievementResponse;
 import com.researchease.dto.ApprovalRecordResponse;
 import com.researchease.dto.ApproveProjectRequest;
+import com.researchease.dto.MyApprovalRecordResponse;
 import com.researchease.dto.ProjectCreateRequest;
 import com.researchease.dto.ProjectResponse;
 import com.researchease.dto.ProjectUpdateRequest;
@@ -30,6 +31,8 @@ public interface ProjectService {
     List<ProjectResponse> listForManager(String status, String keyword);
 
     List<ApprovalRecordResponse> listApprovalRecords(Long projectId, Long currentUserId, String currentRole);
+
+    List<MyApprovalRecordResponse> listMyApprovalRecords(Long currentUserId);
 
     void submitAcceptance(Long projectId, AcceptanceRequest request, Long currentUserId);
 

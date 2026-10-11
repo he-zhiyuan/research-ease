@@ -42,6 +42,11 @@ watch(
       if (notificationStore.items.length > 0) {
         notificationDialogVisible.value = true
       }
+    } else if (role === 'RESEARCHER') {
+      await notificationStore.refresh()
+      if (notificationStore.items.length > 0) {
+        notificationDialogVisible.value = true
+      }
     } else {
       pendingCounts.reset()
       notificationStore.reset()
@@ -53,6 +58,8 @@ watch(
 router.afterEach((to) => {
   if (userStore.role === 'MANAGER' && to.path.startsWith('/manager')) {
     pendingCounts.refresh()
+    notificationStore.refresh()
+  } else if (userStore.role === 'RESEARCHER' && to.path.startsWith('/researcher')) {
     notificationStore.refresh()
   }
 })
@@ -74,7 +81,7 @@ function handleLogout() {
         </el-menu-item>
         <div class="nav-spacer" />
         <el-badge
-          v-if="userStore.role === 'MANAGER' && notificationStore.items.length > 0"
+          v-if="(userStore.role === 'MANAGER' || userStore.role === 'RESEARCHER') && notificationStore.items.length > 0"
           :value="notificationStore.items.length"
           class="bell-badge"
         >

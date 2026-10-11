@@ -103,6 +103,18 @@ export interface ApprovalRecordResponse {
   createdAt: string
 }
 
+export interface MyApprovalRecordResponse {
+  id: number
+  projectId: number
+  projectName: string | null
+  type: ApprovalType
+  targetId: number | null
+  result: ApprovalResult
+  comment: string | null
+  operatorName: string | null
+  createdAt: string
+}
+
 export interface ProgressReportRequest {
   content: string
   reportDate: string

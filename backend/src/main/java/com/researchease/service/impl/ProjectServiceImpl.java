@@ -10,6 +10,7 @@ import com.researchease.dto.ApproveProjectRequest;
 import com.researchease.dto.BudgetApprovalItem;
 import com.researchease.dto.BudgetItemRequest;
 import com.researchease.dto.BudgetItemResponse;
+import com.researchease.dto.MyApprovalRecordResponse;
 import com.researchease.dto.ProjectCreateRequest;
 import com.researchease.dto.ProjectResponse;
 import com.researchease.dto.ProjectUpdateRequest;
@@ -195,6 +196,20 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public List<MyApprovalRecordResponse> listMyApprovalRecords(Long currentUserId) {
+        List<Long> projectIds = projectMapper.selectList(
+                new LambdaQueryWrapper<Project>().eq(Project::getLeaderId, currentUserId))
+                .stream().map(Project::getId).toList();
+        if (projectIds.isEmpty()) {
+            return List.of();
+        }
+        List<ApprovalRecord> records = approvalRecordMapper.selectList(
+                new LambdaQueryWrapper<ApprovalRecord>().in(ApprovalRecord::getProjectId, projectIds)
+                        .orderByDesc(ApprovalRecord::getCreatedAt));
+        return records.stream().map(this::toMyApprovalResponse).toList();
+    }
+
+    @Override
     @Transactional
     public void submitAcceptance(Long projectId, AcceptanceRequest request, Long currentUserId) {
         Project project = requireProject(projectId);
@@ -328,6 +343,15 @@ public class ProjectServiceImpl implements ProjectService {
         User operator = userMapper.selectById(record.getOperatorId());
         return new ApprovalRecordResponse(record.getId(), record.getType(), record.getTargetId(),
                 record.getResult(), record.getComment(), record.getOperatorId(),
+                operator != null ? operator.getRealName() : null, record.getCreatedAt());
+    }
+
+    private MyApprovalRecordResponse toMyApprovalResponse(ApprovalRecord record) {
+        User operator = userMapper.selectById(record.getOperatorId());
+        Project project = projectMapper.selectById(record.getProjectId());
+        return new MyApprovalRecordResponse(record.getId(), record.getProjectId(),
+                project != null ? project.getProjectName() : null, record.getType(), record.getTargetId(),
+                record.getResult(), record.getComment(),
                 operator != null ? operator.getRealName() : null, record.getCreatedAt());
     }
 }
