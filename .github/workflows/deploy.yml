@@ -47,6 +47,13 @@ jobs:
           mkdir -p ~/.ssh
           timeout 20 ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Diagnose SSH handshake
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          timeout 30 ssh -vvv -o ConnectTimeout=15 -o BatchMode=yes "$SSH_USER@$SSH_HOST" echo diagnostic-ok 2>&1 | tail -100 || true
+
       - name: Deploy to server
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
