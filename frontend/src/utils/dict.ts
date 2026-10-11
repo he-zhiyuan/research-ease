@@ -1,6 +1,6 @@
 export const PROJECT_STATUS_LABEL: Record<string, string> = {
   DRAFT: '草稿',
-  SUBMITTED: '已提交',
+  SUBMITTED: '待审批',
   REJECTED: '已驳回',
   EXECUTING: '执行中',
   ACCEPTING: '验收中',
