@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
-import { createUser, listUsers, setUserEnabled } from '@/api/user'
+import { createUser, deleteUser, listUsers, setUserEnabled } from '@/api/user'
 import type { Role, UserResponse } from '@/types'
 import { ROLE_LABEL } from '@/utils/dict'
 import { formatDateTime } from '@/utils/format'
@@ -66,6 +66,17 @@ async function handleToggleEnabled(row: UserResponse, enabled: string | number |
   await loadUsers()
 }
 
+async function handleDelete(row: UserResponse) {
+  await ElMessageBox.confirm(`确定要删除账号「${row.username}」吗？该操作不可恢复。`, '删除账号', {
+    type: 'warning',
+    confirmButtonText: '删除',
+    cancelButtonText: '取消',
+  })
+  await deleteUser(row.id)
+  ElMessage.success('账号已删除')
+  await loadUsers()
+}
+
 onMounted(loadUsers)
 </script>
 
@@ -90,6 +101,18 @@ onMounted(loadUsers)
             :model-value="(row as UserResponse).enabled"
             @change="(val) => handleToggleEnabled(row as UserResponse, val)"
           />
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="100">
+        <template #default="{ row }">
+          <el-button
+            link
+            type="danger"
+            :disabled="(row as UserResponse).username === 'admin'"
+            @click="handleDelete(row as UserResponse)"
+          >
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>

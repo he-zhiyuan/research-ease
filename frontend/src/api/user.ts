@@ -12,3 +12,7 @@ export function createUser(data: UserCreateRequest) {
 export function setUserEnabled(id: number, enabled: boolean) {
   return request.put<unknown, void>(`/users/${id}/enabled`, { enabled })
 }
+
+export function deleteUser(id: number) {
+  return request.delete<unknown, void>(`/users/${id}`)
+}

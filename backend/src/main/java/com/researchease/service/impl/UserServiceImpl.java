@@ -4,7 +4,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.researchease.common.BusinessException;
 import com.researchease.dto.UserCreateRequest;
 import com.researchease.dto.UserResponse;
+import com.researchease.entity.ApprovalRecord;
+import com.researchease.entity.Expenditure;
+import com.researchease.entity.Project;
+import com.researchease.entity.ProgressReport;
 import com.researchease.entity.User;
+import com.researchease.mapper.ApprovalRecordMapper;
+import com.researchease.mapper.ExpenditureMapper;
+import com.researchease.mapper.ProgressReportMapper;
+import com.researchease.mapper.ProjectMapper;
 import com.researchease.mapper.UserMapper;
 import com.researchease.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +26,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private static final String PROTECTED_USERNAME = "admin";
+
     private final UserMapper userMapper;
+    private final ProjectMapper projectMapper;
+    private final ExpenditureMapper expenditureMapper;
+    private final ProgressReportMapper progressReportMapper;
+    private final ApprovalRecordMapper approvalRecordMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -55,6 +69,30 @@ public class UserServiceImpl implements UserService {
         }
         user.setEnabled(enabled);
         userMapper.updateById(user);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long userId) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+        if (PROTECTED_USERNAME.equals(user.getUsername())) {
+            throw new BusinessException("系统管理员账号不可删除");
+        }
+        boolean hasReferences = projectMapper.selectCount(
+                new LambdaQueryWrapper<Project>().eq(Project::getLeaderId, userId)) > 0
+                || expenditureMapper.selectCount(
+                new LambdaQueryWrapper<Expenditure>().eq(Expenditure::getCreatedBy, userId)) > 0
+                || progressReportMapper.selectCount(
+                new LambdaQueryWrapper<ProgressReport>().eq(ProgressReport::getCreatedBy, userId)) > 0
+                || approvalRecordMapper.selectCount(
+                new LambdaQueryWrapper<ApprovalRecord>().eq(ApprovalRecord::getOperatorId, userId)) > 0;
+        if (hasReferences) {
+            throw new BusinessException("该账号已关联项目、经费或审批记录，无法删除，可改为禁用账号");
+        }
+        userMapper.deleteById(userId);
     }
 
     private UserResponse toResponse(User user) {

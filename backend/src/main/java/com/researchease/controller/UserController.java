@@ -8,6 +8,7 @@ import com.researchease.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +40,12 @@ public class UserController {
     @PutMapping("/{id}/enabled")
     public Result<Void> setEnabled(@PathVariable Long id, @Valid @RequestBody UpdateEnabledRequest request) {
         userService.setEnabled(id, request.getEnabled());
+        return Result.ok();
+    }
+
+    @DeleteMapping("/{id}")
+    public Result<Void> delete(@PathVariable Long id) {
+        userService.delete(id);
         return Result.ok();
     }
 }

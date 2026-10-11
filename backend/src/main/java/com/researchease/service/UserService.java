@@ -12,4 +12,6 @@ public interface UserService {
     UserResponse create(UserCreateRequest request);
 
     void setEnabled(Long userId, boolean enabled);
+
+    void delete(Long userId);
 }
