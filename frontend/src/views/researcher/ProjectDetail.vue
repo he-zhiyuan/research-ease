@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getProject, listApprovalRecords, submitAcceptance } from '@/api/project'
+import { getProject, listApprovalRecords, submitAcceptance, submitProject } from '@/api/project'
 import { listProgressReports, submitProgressReport } from '@/api/progress'
 import { listBudgetItemsWithBalance, listExpendituresForProject, submitExpenditure } from '@/api/expenditure'
 import { listAchievements } from '@/api/achievement'
@@ -49,6 +49,23 @@ const expenditureSubmitting = ref(false)
 
 const acceptanceAchievements = ref<AchievementRequest[]>([{ type: 'PAPER', title: '', detail: '', achievedDate: '' }])
 const acceptanceSubmitting = ref(false)
+
+const projectSubmitting = ref(false)
+
+async function handleSubmitProject() {
+  if (!project.value) return
+  await ElMessageBox.confirm(`确认提交项目「${project.value.projectName}」申报吗？`, '提交确认', {
+    type: 'warning',
+  })
+  projectSubmitting.value = true
+  try {
+    await submitProject(projectId)
+    ElMessage.success('提交成功，等待管理人员审批')
+    await loadAll()
+  } finally {
+    projectSubmitting.value = false
+  }
+}
 
 async function loadAll() {
   project.value = await getProject(projectId)
@@ -132,6 +149,22 @@ onMounted(loadAll)
     <div class="header">
       <h2>{{ project.projectName }}</h2>
       <el-tag :type="PROJECT_STATUS_TAG[project.status]">{{ PROJECT_STATUS_LABEL[project.status] }}</el-tag>
+      <el-button
+        v-if="project.status === 'DRAFT' || project.status === 'REJECTED'"
+        class="edit-btn"
+        type="primary"
+        @click="router.push(`/researcher/projects/${projectId}/edit`)"
+      >
+        编辑
+      </el-button>
+      <el-button
+        v-if="project.status === 'DRAFT' || project.status === 'REJECTED'"
+        type="success"
+        :loading="projectSubmitting"
+        @click="handleSubmitProject"
+      >
+        提交
+      </el-button>
       <el-button class="back-btn" @click="router.back()">返回</el-button>
     </div>
 
