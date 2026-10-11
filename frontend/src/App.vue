@@ -6,6 +6,7 @@ import { useUserStore } from '@/store/user'
 import { usePendingCountsStore } from '@/store/pendingCounts'
 import { useNotificationStore } from '@/store/notifications'
 import NotificationDialog from '@/components/NotificationDialog.vue'
+import ElderModeToggle from '@/components/ElderModeToggle.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -99,6 +100,7 @@ function handleLogout() {
       <NotificationDialog v-model:visible="notificationDialogVisible" />
     </div>
     <router-view v-else />
+    <ElderModeToggle />
   </el-config-provider>
 </template>
 

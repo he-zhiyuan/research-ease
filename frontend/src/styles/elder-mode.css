@@ -1,0 +1,71 @@
+/* 适老化模式：大字体 / 大行距 / 大点击区域 / 高对比度 */
+
+html.elder-mode {
+  --el-font-size-base: 18px;
+  --el-font-size-small: 16px;
+  --el-font-size-extra-small: 15px;
+  --el-component-size: 48px;
+  --el-component-size-large: 56px;
+  --el-color-primary: #1d4ed8;
+  --el-border-color: #8a8e97;
+  --el-text-color-regular: #1a1a1a;
+  --el-text-color-primary: #000;
+  --el-text-color-secondary: #333;
+  --el-text-color-placeholder: #666;
+}
+
+html.elder-mode body,
+html.elder-mode p,
+html.elder-mode span,
+html.elder-mode div,
+html.elder-mode a,
+html.elder-mode li,
+html.elder-mode label,
+html.elder-mode td,
+html.elder-mode th,
+html.elder-mode input,
+html.elder-mode textarea {
+  font-size: 19px !important;
+  line-height: 1.8 !important;
+}
+
+html.elder-mode h1,
+html.elder-mode h2,
+html.elder-mode h3 {
+  font-size: 26px !important;
+  line-height: 1.5 !important;
+}
+
+html.elder-mode .el-button {
+  font-size: 1.1em !important;
+  padding: 14px 22px !important;
+}
+
+html.elder-mode .el-input__inner,
+html.elder-mode .el-textarea__inner {
+  font-size: 1em !important;
+}
+
+html.elder-mode .el-menu-item,
+html.elder-mode .el-sub-menu__title {
+  font-size: 18px !important;
+  height: 56px !important;
+  line-height: 56px !important;
+}
+
+html.elder-mode .el-table {
+  font-size: 18px !important;
+}
+
+html.elder-mode .el-dialog__title {
+  font-size: 22px !important;
+}
+
+html.elder-mode .el-form-item {
+  margin-bottom: 24px !important;
+}
+
+html.elder-mode *:focus-visible {
+  outline: 3px solid #1d4ed8 !important;
+  outline-offset: 2px;
+}
